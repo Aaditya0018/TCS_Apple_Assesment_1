@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LLM QnA</title>
+  <style>
+    body { font-family: Arial; max-width: 600px; margin: auto; padding-top: 40px; }
+    textarea, button { width: 100%; padding: 10px; margin-top: 10px; font-size: 16px; }
+    #response { white-space: pre-wrap; margin-top: 20px; background: #f4f4f4; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Ask a Question (tinyllama)</h2>
+  <textarea id="question" rows="4" placeholder="Type your question here..."></textarea>
+  <button onclick="askQuestion()">Ask</button>
+
+  <div id="response"></div>
+
+  <script>
+    async function askQuestion() {
+      const question = document.getElementById("question").value;
+      const resDiv = document.getElementById("response");
+      resDiv.textContent = "Waiting for response...";
+
+      try {
+        const response = await fetch("/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ query: question })
+        });
+
+        const data = await response.json();
+        if (data.answer) {
+          resDiv.textContent = "Answer:\n" + data.answer;
+        } else {
+          resDiv.textContent = "Error: " + (data.error || "Unknown error");
+        }
+      } catch (error) {
+        resDiv.textContent = "Error: " + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
