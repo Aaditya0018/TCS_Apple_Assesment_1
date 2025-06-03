@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>LLM QnA</title>
+  <title>LLM QnA (with File Upload)</title>
   <style>
     body { font-family: Arial; max-width: 600px; margin: auto; padding-top: 40px; }
-    textarea, button { width: 100%; padding: 10px; margin-top: 10px; font-size: 16px; }
+    textarea, button, input { width: 100%; padding: 10px; margin-top: 10px; font-size: 16px; }
     #response { white-space: pre-wrap; margin-top: 20px; background: #f4f4f4; padding: 10px; border-radius: 5px; }
   </style>
 </head>
 <body>
+  <h2>Upload your PDF file</h2>
+  <input type="file" id="file">
+  <button onclick="upload()">Upload</button>
+
   <h2>Ask a Question (tinyllama)</h2>
   <textarea id="question" rows="4" placeholder="Type your question here..."></textarea>
   <button onclick="askQuestion()">Ask</button>
@@ -16,8 +20,35 @@
   <div id="response"></div>
 
   <script>
+    async function upload() {
+      const fileInput = document.getElementById("file");
+      const file = fileInput.files[0];
+      const resDiv = document.getElementById("response");
+
+      if (!file) {
+        resDiv.textContent = "Please select a PDF file.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      resDiv.textContent = "Uploading...";
+
+      try {
+        const res = await fetch("/upload", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        resDiv.textContent = data.message || "Uploaded successfully.";
+      } catch (error) {
+        resDiv.textContent = "Error during upload: " + error.message;
+      }
+    }
+
     async function askQuestion() {
-      const question = document.getElementById("question").value;
+      const questionText = document.getElementById("question").value;
       const resDiv = document.getElementById("response");
       resDiv.textContent = "Waiting for response...";
 
@@ -27,7 +58,7 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ query: question })
+          body: JSON.stringify({ query: questionText })
         });
 
         const data = await response.json();
