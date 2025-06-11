@@ -7,7 +7,11 @@
 
 3. Logs every API request with a unique identifier, user query, and LLM response at API level.
 
-Steps to Run (Task 1)
+4. Now can ask general questions to the model.
+
+## ✅ Task 2: RAG System for File Ingestion + Question Answering
+
+Steps to Run:
 1. Install Ollama: https://ollama.com
 
 2. Pull the TinyLLaMA model
@@ -32,26 +36,38 @@ uvicorn main:app --reload
 ```
 7. Visit the app in browser
 http://127.0.0.1:8000
-
-
-## ✅ Task 2: RAG System for File Ingestion + Question Answering
-1. Users can upload a file (e.g., a resume).
-
-2. Text is extracted, chunked, embedded, and stored in a ChromaDB vector database.
-
-3. Users can ask questions specific to the content of that file.
-
-4. Relevant chunks are retrieved and passed as context to TinyLLaMA to generate an answer.
-5. Updated Readme file
    
-## 🔍 The steps to run Task 2 are the same as Task 1 (Steps 1–7).
-Once the app is running in the browser:
+## 🔍 Getting Started After Launch
+Once the application is running in your browser:
+1. Upload a PDF Document
+Use the upload option in the interface to upload a PDF file (e.g., your resume or any document you want to query).
 
-1. Upload a PDF file using the upload option in the UI (e.g., your resume).
+2. Ask a Question
+After the file is successfully uploaded and processed, enter a question related to the content of the document.
 
-2. After upload, type a question related to the content of that file.
+3. Receive Contextual Answers
+Click the Ask button to get a precise, context-aware answer generated using the content of your uploaded file.
 
-3. Click on the Ask button to receive a contextual answer based on the uploaded document.
+## 🔍 RAG Startegies Used.
+### Basic RAG
+1. Embeds the user query using Sentence Transformers.
+2. Retrieves top k (default: 3) relevant text chunks from the vector database (ChromaDB).
+3. Simple, fast, and efficient for straightforward questions.
+
+### Reranked RAG
+1. Initially retrieves more chunks (default: 10) using the query embedding.
+
+2. Then re-scores these chunks using a CrossEncoder (semantic similarity between query and chunk).
+
+3. The top 3 most relevant chunks are selected based on the reranking score.
+
+### Multi-query RAG
+1. Generates multiple reformulations of the original question using a T5-based query rewriter.
+
+2. Runs vector search for each reformulated query.
+
+3. Aggregates results from all queries, removes duplicates, and selects top relevant chunks (up to 5).
+   
 ## 🔍 RAG Pipeline
 1. Text Extraction: via PyMuPDF (fitz)
 
